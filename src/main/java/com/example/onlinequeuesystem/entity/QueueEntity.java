@@ -19,19 +19,19 @@ public class QueueEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 10) // Uzunluk sınırı ekledik
+    @Column(nullable = false, unique = true, length = 10)
     private String queueNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ServiceType serviceType;
 
-    @Column(nullable = false, length = 100) // Uzunluk sınırı ekledik
+    @Column(nullable = false, length = 100)
     private String userFullName;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private boolean completed = false; // Başlangıçta false
+    private boolean completed = false;
 }

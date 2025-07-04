@@ -113,40 +113,36 @@ public class QueueServiceImpl implements QueueService {
 
     // Növbə nömrəsi yaratma metodu
     private String generateQueueNumber(QueueEntity lastQueue, ServiceType serviceType) {
-        // Servis tipine göre farklı prefix'ler belirlenebilir
         String prefix = getPrefixForServiceType(serviceType);
         int nextNumber = 1;
 
         if (lastQueue != null && lastQueue.getQueueNumber() != null) {
             String lastQueueNum = lastQueue.getQueueNumber();
-            if (lastQueueNum.startsWith(prefix) && lastQueueNum.length() >= 4) { // Örneğin "A001" veya "B123"
+            if (lastQueueNum.startsWith(prefix) && lastQueueNum.length() >= 4) {
                 try {
-                    // Prefix'ten sonraki sayı kısmını al ve bir artır
                     String numStr = lastQueueNum.substring(prefix.length());
                     nextNumber = Integer.parseInt(numStr) + 1;
                 } catch (NumberFormatException e) {
-                    // Sayı parse edilemezse veya format bozuksa, varsayılan olarak sıfırla
                     System.err.println("Növbə nömrəsi parse xətası: " + lastQueueNum + ". " + serviceType + " üçün " + prefix + "001 olaraq sıfırlandı.");
                     nextNumber = 1;
                 }
             }
         }
-        // Sayıyı her zaman 3 basamaklı olacak şekilde formatla (örn: 1 -> 001)
         return prefix + String.format("%03d", nextNumber);
     }
 
-    // Servis tipine göre ön ek belirleme (isteğe bağlı, özelleştirilebilir)
+
     private String getPrefixForServiceType(ServiceType serviceType) {
         return switch (serviceType) {
             case URGENT_MONEY_TRANSFER, URGENT_MONEY_WITHDRAWAL -> "T"; // Təcili
             case PLASTIC_CARD_VISA, PLASTIC_CARD_MASTER -> "K"; // Kart
             case CREDIT_ONLINE, CREDIT_CASH -> "L"; // Kredit
             case DEPOSIT_BOX, DEPOSIT_WITHDRAWAL -> "D"; // Depozit
-            default -> "A"; // Ümumi
+            default -> "A";
         };
     }
 
-    // QueueEntity'den QueueResponseDTO'ya dönüştürme metodu
+
     private QueueResponseDTO convertToDto(QueueEntity entity, String customMessage) {
         String message = customMessage != null ? customMessage :
                 (entity.isCompleted() ? "Növbə tamamlandı." : "Xidmət nömrəniz: " + entity.getQueueNumber() + ". Gözləmədədir.");
@@ -154,7 +150,7 @@ public class QueueServiceImpl implements QueueService {
         return new QueueResponseDTO(
                 entity.getQueueNumber(),
                 message,
-                entity.getServiceType().name(), // Enum adını string olarak al
+                entity.getServiceType().name(),
                 entity.getUserFullName(),
                 entity.isCompleted()
         );

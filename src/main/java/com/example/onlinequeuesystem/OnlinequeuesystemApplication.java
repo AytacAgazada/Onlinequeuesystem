@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories; // Bu satırı ekleyebiliriz
 
 @SpringBootApplication
-@EnableJpaRepositories // JPA Repositories'i etkinleştirmek için
+@EnableJpaRepositories
 public class OnlinequeuesystemApplication {
 
     public static void main(String[] args) {

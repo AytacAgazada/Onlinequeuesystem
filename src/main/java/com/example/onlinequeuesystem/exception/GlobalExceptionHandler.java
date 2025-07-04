@@ -25,21 +25,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST); // 400 Bad Request
     }
 
-    // Uygulamaya özel hatalar için (örn: növbə tapılmadı)
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage()); // 400 Bad Request
     }
 
-    // Beklenmedik genel hatalar için
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Daxili server xətası baş verdi: " + ex.getMessage()); // 500 Internal Server Error
     }
 
-    // Eğer QueueNotFoundException gibi spesifik exception'lar eklerseniz, buraya onları da ekleyin:
-    // @ExceptionHandler(QueueNotFoundException.class)
-    // public ResponseEntity<String> handleQueueNotFound(QueueNotFoundException ex) {
-    //     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage()); // 404 Not Found
-    // }
 }

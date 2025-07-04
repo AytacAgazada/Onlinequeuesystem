@@ -2,7 +2,7 @@ plugins {
     id 'java'
     // Spring Boot versiyonunu 3.3.1'e yükseltiyoruz.
     // Bu, daha yeni özellikler ve güvenlik yamaları içerir.
-    id 'org.springframework.boot' version '3.3.1'
+    id 'org.springframework.boot' version '3.0.0'
     // Bağımlılık yönetimi eklentisinin versiyonunu Spring Boot versiyonuna uygun hale getiriyoruz.
     id 'io.spring.dependency-management' version '1.1.6'
 }

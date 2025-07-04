@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Növbə İdarəetmə Sistemi</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <h1><i class="fas fa-users"></i> Növbə İdarəetmə Sistemi</h1>
+        <p>Bank xidmətləri üçün onlayn növbə sistemi</p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="dashboard">
+            <i class="fas fa-tachometer-alt"></i> İdarə Paneli
+        </button>
+        <button class="tab-btn" data-tab="create">
+            <i class="fas fa-plus"></i> Yeni Növbə
+        </button>
+        <button class="tab-btn" data-tab="queues">
+            <i class="fas fa-list"></i> Növbələr
+        </button>
+        <button class="tab-btn" data-tab="statistics">
+            <i class="fas fa-chart-bar"></i> Statistika
+        </button>
+    </nav>
+
+    <!-- Dashboard Tab -->
+    <div id="dashboard" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Ümumi Növbələr</h3>
+                    <span class="stat-number" id="totalQueues">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon waiting">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Gözləyən</h3>
+                    <span class="stat-number" id="waitingQueues">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon completed">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Tamamlanan</h3>
+                    <span class="stat-number" id="completedQueues">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Queues -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-history"></i> Son Növbələr</h2>
+                <div class="header-controls">
+                    <button id="autoRefreshBtn" class="btn btn-outline" onclick="toggleAutoRefresh()">
+                        <i class="fas fa-play"></i> Auto Yenilə
+                    </button>
+                    <button class="btn btn-outline" onclick="refreshQueues()">
+                        <i class="fas fa-sync-alt"></i> Yenilə
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="recentQueues" class="recent-queues">
+                    <!-- Recent queues will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Queue Tab -->
+    <div id="create" class="tab-content">
+        <div class="card create-form">
+            <div class="card-header">
+                <h2><i class="fas fa-plus-circle"></i> Yeni Növbə Yarat</h2>
+                <p>Yeni müştəri növbəsi əlavə edin</p>
+            </div>
+            <div class="card-content">
+                <form id="createQueueForm">
+                    <div class="form-group">
+                        <label for="serviceType">
+                            <i class="fas fa-cog"></i> Xidmət Növü
+                        </label>
+                        <select id="serviceType" required>
+                            <option value="">Xidmət növünü seçin</option>
+                            <option value="URGENT_MONEY_TRANSFER">Təcili Pul Köçürməsi</option>
+                            <option value="URGENT_MONEY_WITHDRAWAL">Təcili Pul Çıxarılması</option>
+                            <option value="PLASTIC_CARD_VISA">Plastik Kart (Visa)</option>
+                            <option value="PLASTIC_CARD_MASTER">Plastik Kart (Master)</option>
+                            <option value="CREDIT_ONLINE">Kredit (Online)</option>
+                            <option value="CREDIT_CASH">Kredit (Nağd)</option>
+                            <option value="DEPOSIT_BOX">Depozit Qutusu</option>
+                            <option value="DEPOSIT_WITHDRAWAL">Depozit Çıxarılması</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userFullName">
+                            <i class="fas fa-user"></i> Tam Ad
+                        </label>
+                        <input
+                                type="text"
+                                id="userFullName"
+                                placeholder="Müştərinin tam adını daxil edin"
+                                required
+                                minlength="2"
+                                maxlength="50"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="createBtn">
+                        <i class="fas fa-plus"></i> Növbə Yarat
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queues Tab -->
+    <div id="queues" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-list"></i> Növbələr Siyahısı</h2>
+                <div class="header-controls">
+                    <select id="filterServiceType" class="filter-select">
+                        <option value="all">Bütün Xidmətlər</option>
+                        <option value="URGENT_MONEY_TRANSFER">Təcili Pul Köçürməsi</option>
+                        <option value="URGENT_MONEY_WITHDRAWAL">Təcili Pul Çıxarılması</option>
+                        <option value="PLASTIC_CARD_VISA">Plastik Kart (Visa)</option>
+                        <option value="PLASTIC_CARD_MASTER">Plastik Kart (Master)</option>
+                        <option value="CREDIT_ONLINE">Kredit (Online)</option>
+                        <option value="CREDIT_CASH">Kredit (Nağd)</option>
+                        <option value="DEPOSIT_BOX">Depozit Qutusu</option>
+                        <option value="DEPOSIT_WITHDRAWAL">Depozit Çıxarılması</option>
+                    </select>
+                    <button id="autoRefreshBtn2" class="btn btn-outline" onclick="toggleAutoRefresh()">
+                        <i class="fas fa-play"></i> Auto Yenilə
+                    </button>
+                    <button class="btn btn-outline" onclick="refreshQueues()">
+                        <i class="fas fa-sync-alt"></i> Yenilə
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table id="queuesTable">
+                        <thead>
+                        <tr>
+                            <th>Növbə №</th>
+                            <th>Müştəri</th>
+                            <th>Xidmət</th>
+                            <th>Status</th>
+                            <th>Əməliyyatlar</th>
+                        </tr>
+                        </thead>
+                        <tbody id="queuesTableBody">
+                        <!-- Queue data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="loadingQueues" class="loading hidden">
+                    <i class="fas fa-spinner fa-spin"></i> Yüklənir...
+                </div>
+                <div id="noQueues" class="no-data hidden">
+                    <i class="fas fa-inbox"></i>
+                    <p>Hələ ki növbə yoxdur</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Tab -->
+    <div id="statistics" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-chart-bar"></i> Statistika</h2>
+                <p>Sistem statistikaları və hesabatlar</p>
+            </div>
+            <div class="card-content">
+                <div id="statisticsContent" class="statistics-content">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Statistika yüklənir...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Yüklənir...</p>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

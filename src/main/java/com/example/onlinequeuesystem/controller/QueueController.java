@@ -3,7 +3,7 @@ package com.example.onlinequeuesystem.controller;
 import com.example.onlinequeuesystem.dto.QueueRequestDTO;
 import com.example.onlinequeuesystem.dto.QueueResponseDTO;
 import com.example.onlinequeuesystem.enumeration.ServiceType;
-import com.example.onlinequeuesystem.service.QueueService; // Arayüzü import et
+import com.example.onlinequeuesystem.service.QueueService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +15,8 @@ import java.util.List;
 @RequestMapping("/api/queues")
 public class QueueController {
 
-    private final QueueService queueService; // Interface tipi olarak tanımla
+    private final QueueService queueService;
 
-    // Constructor Injection ile bağımlılığı enjekte et
     public QueueController(QueueService queueService) {
         this.queueService = queueService;
     }
