@@ -14,4 +14,4 @@ public interface QueueService {
     void deleteQueue(Long id);
     void markQueueAsCompleted(Long id);
     String getStatistics();
-}
+}//

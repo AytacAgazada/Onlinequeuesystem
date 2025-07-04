@@ -8,5 +8,5 @@ public enum ServiceType {
     CREDIT_ONLINE,
     CREDIT_CASH,
     DEPOSIT_BOX,
-    DEPOSIT_WITHDRAWAL
+    DEPOSIT_WITHDRAWAL//
 }

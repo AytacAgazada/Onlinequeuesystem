@@ -11,5 +11,5 @@ public class QueueResponseDTO {
     private String message;
     private String serviceType;
     private String userFullName;
-    private boolean completed;
+    private boolean completed;//
 }

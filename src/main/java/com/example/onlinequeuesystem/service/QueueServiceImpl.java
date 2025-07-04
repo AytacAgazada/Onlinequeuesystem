@@ -152,7 +152,7 @@ public class QueueServiceImpl implements QueueService {
                 message,
                 entity.getServiceType().name(),
                 entity.getUserFullName(),
-                entity.isCompleted()
+                entity.isCompleted()//
         );
     }
 }

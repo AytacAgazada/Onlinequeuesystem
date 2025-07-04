@@ -33,5 +33,5 @@ public class QueueEntity {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private boolean completed = false;
+    private boolean completed = false;//
 }

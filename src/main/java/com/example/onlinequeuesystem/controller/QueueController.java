@@ -46,7 +46,7 @@ public class QueueController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQueue(@PathVariable Long id) {
         queueService.deleteQueue(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/complete")

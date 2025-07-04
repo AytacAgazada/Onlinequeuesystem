@@ -27,4 +27,4 @@ public interface QueueRepository extends JpaRepository<QueueEntity, Long> {
 
 
     long countByServiceTypeAndCompleted(ServiceType serviceType, boolean completed);
-}
+}//

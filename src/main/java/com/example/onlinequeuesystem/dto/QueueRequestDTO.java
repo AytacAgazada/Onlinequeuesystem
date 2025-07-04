@@ -16,7 +16,7 @@ public class QueueRequestDTO {
     @NotNull(message = "Xidmət növü boş ola bilməz.")
     private ServiceType serviceType;
 
-    @NotBlank(message = "Ad boş ola bilməz.")
+    @NotBlank(message = "Ad boş ola bilməz.")//
     @Size(min = 2, max = 50, message = "Ad 2-50 simvol arasında olmalıdır.")
     private String userFullName;
 }
