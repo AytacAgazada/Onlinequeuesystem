@@ -26,6 +26,8 @@ const tabButtons = document.querySelectorAll(".tab-btn")
 const tabContents = document.querySelectorAll(".tab-content")
 const createQueueForm = document.getElementById("createQueueForm")
 const filterServiceType = document.getElementById("filterServiceType")
+const autoRefreshBtn1 = document.getElementById("autoRefreshBtn") // Birinci auto refresh düyməsi
+const autoRefreshBtn2 = document.getElementById("autoRefreshBtn2") // İkinci auto refresh düyməsi
 
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
@@ -62,6 +64,14 @@ function switchTab(tabId) {
 function initializeEventListeners() {
     createQueueForm.addEventListener("submit", handleCreateQueue)
     filterServiceType.addEventListener("change", handleFilterChange)
+
+    // Auto Refresh düymələri üçün event listener-lar
+    if (autoRefreshBtn1) {
+        autoRefreshBtn1.addEventListener("click", toggleAutoRefresh)
+    }
+    if (autoRefreshBtn2) {
+        autoRefreshBtn2.addEventListener("click", toggleAutoRefresh)
+    }
 }
 
 // API Functions
@@ -73,11 +83,13 @@ async function apiCall(endpoint, options = {}) {
         },
     }
 
+    showLoading() // Her API çağırışında loading göstər
     try {
         const response = await fetch(url, { ...defaultOptions, ...options })
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+            const errorText = await response.text()
+            throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorText}`)
         }
 
         const contentType = response.headers.get("content-type")
@@ -88,20 +100,21 @@ async function apiCall(endpoint, options = {}) {
         }
     } catch (error) {
         console.error("API call failed:", error)
+        showToast("Xəta", `API çağırışında səhv: ${error.message}`, "error")
         throw error
+    } finally {
+        hideLoading() // API çağırışı bitdikdə loading gizlə
     }
 }
 
 // Load Initial Data
 async function loadInitialData() {
-    showLoading()
     try {
         await loadQueues()
         updateDashboardStats()
     } catch (error) {
-        showToast("Xəta", "Məlumatlar yüklənə bilmədi", "error")
-    } finally {
-        hideLoading()
+        // Hata toast'ı apiCall içinde gösterildiği için burada tekrar göstermiyoruz.
+        // showToast("Xəta", "Məlumatlar yüklənə bilmədi", "error");
     }
 }
 
@@ -109,14 +122,18 @@ async function loadInitialData() {
 async function loadQueues() {
     try {
         allQueues = await apiCall("/list")
-        filteredQueues = [...allQueues]
+        filteredQueues = [...allQueues] // Bütün növbələri yüklədikdən sonra süzgəcdən keçirilənləri də yenilə
         updateDashboardStats()
         displayRecentQueues()
         displayQueues()
+        // Filter dropdown-ı yeniləyici yükləmədən sonra tətbiq edin
+        handleFilterChange(); // Filtri yenidən tətbiq et
     } catch (error) {
-        showToast("Xəta", "Növbələr yüklənə bilmədi", "error")
         allQueues = []
         filteredQueues = []
+        updateDashboardStats()
+        displayRecentQueues()
+        displayQueues()
     }
 }
 
@@ -153,54 +170,55 @@ async function handleCreateQueue(event) {
 
         showToast("Uğurlu", `Növbə yaradıldı: ${newQueue.queueNumber}`, "success")
         createQueueForm.reset()
-        await loadQueues()
+        await loadQueues() // Yeni növbə yaradıldıqdan sonra siyahını yenilə
     } catch (error) {
-        showToast("Xəta", "Növbə yaradıla bilmədi", "error")
+        // Hata toast'ı apiCall içinde gösterildiği için burada tekrar göstermiyoruz.
+        // showToast("Xəta", "Növbə yaradıla bilmədi", "error");
     } finally {
         createBtn.disabled = false
         createBtn.innerHTML = originalText
     }
 }
 
-// Queue number ilə tamamlama
-async function completeQueue(queueNumber) {
+// ID ilə tamamlama
+async function completeQueueById(id) {
     try {
-        showLoading()
-
-        const response = await apiCall(`/complete-by-number/${queueNumber}`, {
+        // showLoading(); // apiCall içinde zaten var
+        await apiCall(`/${id}/complete`, { // Backend-dəki PUT endpoint-ə uyğun
             method: "PUT",
         })
 
-        showToast("Uğurlu", `Növbə ${queueNumber} tamamlandı`, "success")
-        await loadQueues()
+        showToast("Uğurlu", `Növbə ${id} tamamlandı`, "success")
+        await loadQueues() // Tamamlandıqdan sonra siyahını yenilə
     } catch (error) {
-        console.error("Complete queue error:", error)
-        showToast("Xəta", "Növbə tamamlana bilmədi", "error")
+        // Hata toast'ı apiCall içinde gösterildiği için burada tekrar göstermiyoruz.
+        // console.error("Complete queue error:", error);
+        // showToast("Xəta", "Növbə tamamlana bilmədi", "error");
     } finally {
-        hideLoading()
+        // hideLoading(); // apiCall içinde zaten var
     }
 }
 
-// Queue number ilə silmə
-async function deleteQueue(queueNumber) {
-    if (!confirm(`${queueNumber} nömrəli növbəni silmək istədiyinizə əminsiniz?`)) {
+// ID ilə silmə
+async function deleteQueueById(id) {
+    if (!confirm(`${id} nömrəli növbəni silmək istədiyinizə əminsiniz?`)) {
         return
     }
 
     try {
-        showLoading()
-
-        await apiCall(`/delete-by-number/${queueNumber}`, {
+        // showLoading(); // apiCall içinde zaten var
+        await apiCall(`/${id}`, { // Backend-dəki DELETE endpoint-ə uyğun
             method: "DELETE",
         })
 
-        showToast("Uğurlu", `Növbə ${queueNumber} silindi`, "success")
-        await loadQueues()
+        showToast("Uğurlu", `Növbə ${id} silindi`, "success")
+        await loadQueues() // Silindikdən sonra siyahını yenilə
     } catch (error) {
-        console.error("Delete queue error:", error)
-        showToast("Xəta", "Növbə silinə bilmədi", "error")
+        // Hata toast'ı apiCall içinde gösterildiği için burada tekrar göstermiyoruz.
+        // console.error("Delete queue error:", error);
+        // showToast("Xəta", "Növbə silinə bilmədi", "error");
     } finally {
-        hideLoading()
+        // hideLoading(); // apiCall içinde zaten var
     }
 }
 
@@ -213,30 +231,34 @@ function handleFilterChange() {
         filteredQueues = allQueues.filter((queue) => queue.serviceType === selectedType)
     }
 
-    displayQueues()
+    displayQueues() // Filtri tətbiq etdikdən sonra növbələri yenidən göstər
 }
 
 // Auto Refresh Functionality
 function toggleAutoRefresh() {
-    const button1 = document.getElementById("autoRefreshBtn")
-    const button2 = document.getElementById("autoRefreshBtn2")
+    // Both buttons should reflect the same state
+    const setButtonState = (button, isEnabled) => {
+        if (button) {
+            if (isEnabled) {
+                button.innerHTML = '<i class="fas fa-pause"></i> Auto Yenilə'
+                button.classList.remove("btn-outline")
+                button.classList.add("btn-success")
+            } else {
+                button.innerHTML = '<i class="fas fa-play"></i> Auto Yenilə'
+                button.classList.remove("btn-success")
+                button.classList.add("btn-outline")
+            }
+        }
+    }
 
     if (autoRefreshEnabled) {
         // Stop auto refresh
         clearInterval(autoRefreshInterval)
+        autoRefreshInterval = null; // Təmizlə
         autoRefreshEnabled = false
 
-        const stopHTML = '<i class="fas fa-play"></i> Auto Yenilə'
-        if (button1) {
-            button1.innerHTML = stopHTML
-            button1.classList.remove("btn-success")
-            button1.classList.add("btn-outline")
-        }
-        if (button2) {
-            button2.innerHTML = stopHTML
-            button2.classList.remove("btn-success")
-            button2.classList.add("btn-outline")
-        }
+        setButtonState(autoRefreshBtn1, false)
+        setButtonState(autoRefreshBtn2, false)
 
         showToast("Info", "Auto yeniləmə dayandırıldı", "info")
     } else {
@@ -247,17 +269,8 @@ function toggleAutoRefresh() {
 
         autoRefreshEnabled = true
 
-        const startHTML = '<i class="fas fa-pause"></i> Auto Yenilə'
-        if (button1) {
-            button1.innerHTML = startHTML
-            button1.classList.remove("btn-outline")
-            button1.classList.add("btn-success")
-        }
-        if (button2) {
-            button2.innerHTML = startHTML
-            button2.classList.remove("btn-outline")
-            button2.classList.add("btn-success")
-        }
+        setButtonState(autoRefreshBtn1, true)
+        setButtonState(autoRefreshBtn2, true)
 
         showToast("Success", "Auto yeniləmə başladı (5s)", "success")
     }
@@ -276,7 +289,11 @@ function updateDashboardStats() {
 
 function displayRecentQueues() {
     const recentQueuesContainer = document.getElementById("recentQueues")
-    const recentQueues = allQueues.slice(0, 5)
+    // Son 5 tamamlanmamış növbəni göstər (və ya başqa bir məntiq tətbiq edə bilərsiniz)
+    const recentQueues = allQueues
+        .filter(q => !q.completed) // Yalnız gözləyənləri göstərmək üçün
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Ən yenidən köhnəyə sırala
+        .slice(0, 5);
 
     if (recentQueues.length === 0) {
         recentQueuesContainer.innerHTML = `
@@ -337,17 +354,17 @@ function displayQueues() {
                     ${
                 !queue.completed
                     ? `
-                        <button class="btn btn-success" onclick="completeQueue('${queue.queueNumber}')" title="Tamamla">
-                            <i class="fas fa-check"></i>
-                        </button>
-                    `
+                            <button class="btn btn-success" onclick="completeQueueById(${queue.id})" title="Tamamla">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        `
                     : `
-                        <button class="btn btn-success" disabled title="Artıq tamamlanıb">
-                            <i class="fas fa-check-double"></i>
-                        </button>
-                    `
+                            <button class="btn btn-success" disabled title="Artıq tamamlanıb">
+                                <i class="fas fa-check-double"></i>
+                            </button>
+                        `
             }
-                    <button class="btn btn-danger" onclick="deleteQueue('${queue.queueNumber}')" title="Sil">
+                    <button class="btn btn-danger" onclick="deleteQueueById(${queue.id})" title="Sil">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -381,6 +398,7 @@ async function loadStatistics() {
 // Utility Functions
 function refreshQueues() {
     loadQueues()
+    showToast("Məlumat", "Növbələr yeniləndi", "info");
 }
 
 function showLoading() {

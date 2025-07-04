@@ -148,11 +148,12 @@ public class QueueServiceImpl implements QueueService {
                 (entity.isCompleted() ? "Növbə tamamlandı." : "Xidmət nömrəniz: " + entity.getQueueNumber() + ". Gözləmədədir.");
 
         return new QueueResponseDTO(
+                entity.getId(), // <-- Bu sətri əlavə edin: entity-nin ID-sini DTO-ya ötürürük
                 entity.getQueueNumber(),
                 message,
                 entity.getServiceType().name(),
                 entity.getUserFullName(),
-                entity.isCompleted()//
+                entity.isCompleted()
         );
     }
 }
