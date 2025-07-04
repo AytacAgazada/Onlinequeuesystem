@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    // Spring Boot versiyonunu 3.3.1'e yükseltiyoruz.
+    // Bu, daha yeni özellikler ve güvenlik yamaları içerir.
+    id 'org.springframework.boot' version '3.3.1'
+    // Bağımlılık yönetimi eklentisinin versiyonunu Spring Boot versiyonuna uygun hale getiriyoruz.
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.example.onlinequeuesystem' // Projenizin paket adıyla tutarlı hale getirdik
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17) // Java 17 kullandığınızı varsayarak
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot Starter Dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation' // Jakarta Validation için
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Lombok (Kod tekrarını azaltmak için)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Database Drivers
+    // PostgreSQL driver'ı ana veritabanınız olarak görünüyor.
+    runtimeOnly 'org.postgresql:postgresql'
+    // H2 in-memory veritabanı driver'ı. Eğer sadece PostgreSQL kullanacaksanız bu satırı silebilirsiniz.
+    // Genellikle test ortamlarında hızlı in-memory veritabanı olarak kullanılır.
+    runtimeOnly 'com.h2database:h2'
+
+    // Springdoc OpenAPI (Swagger UI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+    // Development Tools (İsteğe bağlı, otomatik yeniden başlatma için)
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Test Dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
